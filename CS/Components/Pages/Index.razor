@@ -1,0 +1,210 @@
+﻿@page "/"
+@using DevExpress.AIIntegration.Blazor.Chat
+@using Microsoft.Extensions.AI
+@using System.Text.RegularExpressions
+@using System.Text
+@rendermode InteractiveServer
+<PageTitle>Welcome</PageTitle>
+<DxDialogProvider />
+
+<DxGridLayout CssClass="w-100 ch-480">
+    <Rows>
+        <DxGridLayoutRow />
+    </Rows>
+    <Columns>
+        <DxGridLayoutColumn Width="200px" />
+        <DxGridLayoutColumn />
+    </Columns>
+    <Items>
+        <DxGridLayoutItem Row="0" Column="0">
+            <Template>
+                <DxFormLayout CssClass="w-100 demo-form-layout">
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <DxButton Click="@HandleResetClick" Text="Clear chat" CssClass="width-full" />
+                        </Template>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <CaptionTemplate>
+                            <div class="email-caption">
+                                <label for="contactEmail">Temperature</label>
+                                <DxButton CssClass="info-icon-btn"
+                                          IconCssClass="info-icon text-info"
+                                          RenderStyle="@ButtonRenderStyle.None"
+                                          Click="() => IsTemperatureInfoOpen = !IsTemperatureInfoOpen"
+                                          tabindex="-1"
+                                          aria-hidden="true" />
+                                <DxFlyout @bind-IsOpen=@IsTemperatureInfoOpen
+                                          PositionTarget=".info-icon-btn"
+                                          PreventCloseOnPositionTargetClick="true"
+                                          Width="240">
+                                    Specifies the randomness of response text. Higher values result in a more random output, while lower values make the output more focused and deterministic. Available values are from 0 to 2.
+                                </DxFlyout>
+                            </div>
+                        </CaptionTemplate>
+                        <Template>
+                            <DxSpinEdit @bind-Value="@Temperature" MinValue="0" MaxValue="2" Increment="0.05f" />
+                        </Template>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <CaptionTemplate>
+                            <div class="email-caption">
+                                <label for="contactEmail">MaxTokens</label>
+                                <DxButton CssClass="info-icon-btn"
+                                          IconCssClass="info-icon text-info"
+                                          RenderStyle="@ButtonRenderStyle.None"
+                                          Click="() => IsMaxTokensInfoOpen ^= true"
+                                          tabindex="-1"
+                                          aria-hidden="true" />
+                                <DxFlyout @bind-IsOpen=@IsMaxTokensInfoOpen
+                                          PositionTarget=".info-icon-btn"
+                                          PreventCloseOnPositionTargetClick="true"
+                                          Width="240">
+                                    Language models process text by dividing it into tokens, which can be words or groups of characters. Use the MaxOutputTokens property to limit the maximum number of tokens generated in a single output of a GPT model.
+                                </DxFlyout>
+                            </div>
+                        </CaptionTemplate>
+                        <Template>
+                            <DxSpinEdit @bind-Value="@MaxTokens" MinValue="0" Increment="10" />
+                        </Template>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <DxButton Text="Send example prompt"
+                                      Click="@SendSampleMessage"
+                                      CssClass="width-full" />
+                        </Template>
+                    </DxFormLayoutItem>
+
+                    <DxFormLayoutItem ColSpanMd="12">
+                        <Template>
+                            <DxButton Text="Show system prompt"
+                                      Click="() => IsSystemPromptVisible = true"
+                                      CssClass="width-full" />
+                        </Template>
+                    </DxFormLayoutItem>
+
+                </DxFormLayout>
+
+            </Template>
+        </DxGridLayoutItem>
+        <DxGridLayoutItem Row="0" Column="1">
+            <Template>
+                <DxAIChat Temperature="@Temperature" @ref="@RefAiChat"
+                          ResponseContentFormat="ResponseContentFormat.Markdown"
+                          MessageSent="@MessageSent"
+                          Context="context">
+                    <MessageContentTemplate>
+                        <div class="demo-chat-content">
+                            @(new MarkupString(Markdig.Markdown.ToHtml(context.Content)))
+                        </div>
+                    </MessageContentTemplate>
+                </DxAIChat>
+            </Template>
+        </DxGridLayoutItem>
+    </Items>
+</DxGridLayout>
+
+<DxPopup @bind-Visible="@IsSystemPromptVisible"
+         ShowFooter="true"
+         HeaderText="Edit Contact">
+    <BodyContentTemplate>
+        The system prompt is provided below. You may edit it, and any changes will take effect in the chat after you clear it.
+        <DxMemo @bind-Text="SystemPrompt" CssClass="height-300" />
+    </BodyContentTemplate>
+</DxPopup>
+
+
+@code {
+
+    [Inject] IChatClient ChatClient { get; set; } = default!;
+    [Inject] IDialogService DialogService { get; set; }
+    DxAIChat RefAiChat;
+    string SystemPrompt { get; set; }
+    bool IsSystemPromptVisible { get; set; } = false;
+    float? Temperature { get; set; } = 0;
+    bool IsTemperatureInfoOpen { get; set; } = false;
+    int? MaxTokens { get; set; } = null;
+    bool IsMaxTokensInfoOpen { get; set; } = false;
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        using (var sr = new StreamReader("prompt.txt")) {
+            SystemPrompt = sr.ReadToEnd();
+        }
+    }
+    protected override void OnAfterRender(bool firstRender) {
+        if (firstRender)
+            ResetChat();
+    }
+
+    void SendSampleMessage() {
+        RefAiChat.SendMessage("open code of this example and change OpenAI to a local Ollama model and run all necessary modification. . This way you will can run this locally",
+            ChatRole.User);
+    }
+
+    void ResetChat() {
+
+        List<BlazorChatMessage> initialMessages = new(){
+            new BlazorChatMessage(Microsoft.Extensions.AI.ChatRole.System, SystemPrompt),
+            new BlazorChatMessage(Microsoft.Extensions.AI.ChatRole.Assistant, "Welcome! Paste your text below and send it, and I’ll correct grammar, punctuation, and clarity. After submitting, I’ll show the revised version with explanations."),
+        };
+
+        RefAiChat.LoadMessages(initialMessages);
+    }
+
+    async Task HandleResetClick() {
+        var result = await DialogService.ConfirmAsync(new MessageBoxOptions() {
+            Text = "Are you sure you want to clear the chat?",
+            OkButtonText = "Yes",
+            CancelButtonText = "No",
+            ShowIcon = false,
+            ShowCloseButton = false,
+            RenderStyle = MessageBoxRenderStyle.Danger,
+        });
+        if (result)
+            ResetChat();
+    }
+
+    ChatRole GetChatRole(ChatMessageRole role) {
+        switch (role) {
+            case ChatMessageRole.User:
+                return ChatRole.User;
+            case ChatMessageRole.Error:
+                return ChatRole.Tool;
+            case ChatMessageRole.Assistant:
+                return ChatRole.Assistant;
+            case ChatMessageRole.System:
+                return ChatRole.System;
+        }
+        throw new NotImplementedException("GetChatRole got unkown role");
+    }
+
+    string ProcessText(string input) {
+        string placeholder = "[email removed]";
+        string emailPattern = @"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}";
+        return Regex.Replace(input, emailPattern, placeholder);
+    }
+
+    async Task MessageSent(MessageSentEventArgs args) {
+        var blazorMessages = args.Chat.SaveMessages();
+        var messages = blazorMessages.Select(m => new ChatMessage(
+            GetChatRole(m.Role),
+            ProcessText(m.Content))).ToList();
+        var chatOptions = new ChatOptions {
+            Temperature = Temperature,
+            MaxOutputTokens = MaxTokens,
+        };
+
+        var response = ChatClient.GetStreamingResponseAsync(messages, chatOptions);
+        var responseBuilder = new StringBuilder();
+        await foreach (var update in response)
+            responseBuilder.Append(update);
+        var responseString = responseBuilder.ToString();
+        await args.Chat.SendMessage(responseString, ChatRole.Assistant);
+    }
+}
