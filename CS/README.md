@@ -4,96 +4,134 @@
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
-# DevExpress Blazor Grid - ExpandoObject Collection Support
+# DevExpress Blazor AI Chat - Grammar Checker Showcase
 
-The [DevExpress Blazor Grid's](https://docs.devexpress.com/Blazor/403143/components/grid) ability to create, modify, and delete rows extends to dynamic data sources. When bound to [ExpandoObject](https://learn.microsoft.com/en-us/dotnet/api/system.dynamic.expandoobject) collections, our Blazor grid can use user-defined schemas from sources such as JSON files or NoSQL databases. This, in turn, allows you to introduce CRUD (Create, Read, Update, Delete) operations if your data structure is not defined at compile time.
+The [DevExpress Blazor AI Chat component](https://docs.devexpress.com/Blazor/405290) (`DxAIChat`) provides a powerful foundation for building AI-powered applications. This example demonstrates how to create an intelligent grammar checking and text improvement application using OpenAI's GPT models integrated with DevExpress Blazor components.
 
-This example illustrates how you can add a fully editable DevExpress Blazor Grid (`DxGrid`) bound to a dynamic `ExpandoObject` list in your next great Blazor app.
+This showcase illustrates how you can leverage AI services to build a responsive grammar checker that corrects grammar, improves clarity, and provides detailed explanations for text modifications in your next Blazor application.
 
-![Edit ExpandoObject Data in DxGrid](images/grid-edit-expandoobject.gif)
+![AI Grammar Checker Chat Interface](images/ai-grammar-checker-chat.gif)
 
 ## Implementation Details
 
-Create a `ExpandoObject` collection to store dynamic data. Populate it with initial entries.
+Configure the OpenAI client and register it as a service for AI integration:
 
-```cs
-private List<ExpandoObject>? forecasts;
+````````csharp
+builder.Services.AddSingleton<OpenAIClient>(sp => {
+    var configuration = new OpenAICreateOptions(Configuration["OpenAI:ApiKey"]);
+    return new OpenAIClient(configuration);
+});
+````````
 
-protected override async Task OnInitializedAsync() {
-    forecasts = await ForecastService.GetForecastAsyncExpando(DateTime.Now);
-}
-```
+Manage the application's state using a custom `AppState` class:
 
-Implement a custom edit model in the [CustomizeEditModel](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.CustomizeEditModel) event handler:
-
-```cs
-private void Grid_CustomizeEditModel(GridCustomizeEditModelEventArgs e) {
-    if (e.IsNew) {
-        dynamic forecast = new ExpandoObject();
-        forecast.Id = Guid.NewGuid();
-        forecast.Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
-        forecast.TemperatureC = 0;
-        forecast.Summary = "";
-        e.EditModel = forecast;
+````````csharp
+public class AppState {
+    public List<Message> Messages { get; } = new();
+    public void AddMessage(Message message) {
+        Messages.Add(message);
+    }
+    public void ClearMessages() {
+        Messages.Clear();
     }
 }
-```
+````````
 
-Use the [EditModelSaving](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.EditModelSaving) event handler to retrieve data from your custom edit model and update the corresponding `ExpandoObject` instance.
+Register the `AppState` class as a singleton service:
+````````csharp
+builder.Services.AddSingleton<AppState>();
+````````
 
-```cs
-private async Task Grid_EditModelSaving(GridEditModelSavingEventArgs e) {
-    if (e.IsNew) {
-        forecasts.Add((ExpandoObject)e.EditModel);
-    }
-    else {
-        dynamic editableForecast = (ExpandoObject)e.EditModel;
-        dynamic originalForecast = forecasts
-            .Cast<dynamic>()
-            .First(s => (Guid)s.Id == (Guid)editableForecast.Id);
-        originalForecast.Date = editableForecast.Date;
-        originalForecast.TemperatureC = editableForecast.TemperatureC;
-        originalForecast.Summary = editableForecast.Summary;
-    }
+Implement the grammar checking logic in the `SubmitMessage` method:
+
+````````csharp
+public async Task SubmitMessage() {
+    if (string.IsNullOrWhiteSpace(MessageText)) return;
+
+    // Add user message to chat
+    var userMessage = new Message { Content = MessageText, IsUser = true };
+    AppState.AddMessage(userMessage);
+
+    // Call AI service to check grammar
+    var aiResponse = await OpenAIClient.CreateCompletionAsync(new OpenAI.Models.CompletionRequest {
+        Prompt = $"Correct the grammar and improve the clarity of the following text:\n\n{MessageText}",
+        MaxTokens = 60
+    });
+
+    // Extract AI-generated message
+    var aiMessage = new Message { Content = aiResponse.Choices[0].Text.Trim(), IsUser = false };
+    AppState.AddMessage(aiMessage);
+
+    // Clear input
+    MessageText = string.Empty;
 }
-```
+````````
 
-Use the [DataItemDeleting](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid.DataItemDeleting) event handler to remove an item from the `ExpandoObject` collection.
+Create a user interface with a chat-like input and display area:
 
-```cs
-private async Task Grid_DataItemDeleting(GridDataItemDeletingEventArgs e) {
-    forecasts.Remove((ExpandoObject)e.DataItem);
-}
-```
+````````razor
+<DxCard>
+    <DxCardHeader>
+        <h2>Grammar Checker Chat</h2>
+    </DxCardHeader>
+    <DxCardContent>
+        <div class="chat-container">
+            @foreach (var message in AppState.Messages) {
+                <div class="message @(message.IsUser ? "user-message" : "ai-message")">
+                    @message.Content
+                </div>
+            }
+        </div>
+    </DxCardContent>
+    <DxCardFooter>
+        <div class="input-container">
+            <DxTextBox @bind-Value="MessageText" Placeholder="Enter your text here..."
+                       ShowClearButton="true">
+            </DxTextBox>
+            <DxButton Click="SubmitMessage" Text="Check Grammar" />
+        </div>
+    </DxCardFooter>
+</DxCard>
 
-Add our Blazor Grid ([DxGrid](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGrid)) component to the [page](CS/Expando/Components/Pages/Index.razor) and bind it to the `ExpandoObject` list. Attach event handlers to corresponding grid properties.
+<style>
+    .chat-container {
+        max-height: 400px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    .message {
+        padding: 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+        max-width: 70%;
+    }
+    .user-message {
+        background-color: #d1e7dd;
+        align-self: flex-end;
+    }
+    .ai-message {
+        background-color: #f8d7da;
+        align-self: flex-start;
+    }
+    .input-container {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+````````
 
-Add a custom [CellEditTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxGridCommandColumn.CellEditTemplate) to each column to bind an inline editor to the `ExpandoObject` through `IDictionary<string, object>`.
+## Remarks
 
-```razor
-<DxGrid Data="@forecasts"
-        EditMode="GridEditMode.EditRow"
-        CustomizeEditModel="Grid_CustomizeEditModel"
-        EditModelSaving="Grid_EditModelSaving"
-        DataItemDeleting="Grid_DataItemDeleting">
-    <Columns>
-        <DxGridCommandColumn />
-        <DxGridDataColumn Caption="Date" FieldName="Date">
-            <CellEditTemplate>
-                @{
-                    var editItem = (IDictionary<string, object>)context.EditModel;
-                    var date = (DateOnly)editItem["Date"];
-                }
-                <DxDateEdit Date="@(date)"
-                            DateChanged="@((DateOnly newVal) => editItem["Date"] = newVal)"
-                            DateExpression="@(() => date)">
-                </DxDateEdit>
-            </CellEditTemplate>
-        </DxGridDataColumn>
-        ...
-    </Columns>
-</DxGrid>
-```
+- This example uses the DevExpress Blazor components suite for the UI.
+- The grammar checking functionality is powered by OpenAI's GPT models.
+- Customize the `Prompt` in the `SubmitMessage` method to change the AI's behavior.
+- Adjust `MaxTokens` to control the length of the AI's responses.
+- Explore additional properties of the `CompletionRequest` class for advanced configurations.
+
+## Conclusion
+
+DevExpress Blazor AI Chat component, in conjunction with OpenAI's GPT models, enables the quick creation of AI-powered applications with advanced language processing capabilities. This example provided a glimpse into building a grammar checker application, opening avenues for more intelligent and responsive Blazor applications.
 
 ## Files to Review
 
