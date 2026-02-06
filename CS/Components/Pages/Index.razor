@@ -3,6 +3,8 @@
 @using Microsoft.Extensions.AI
 @using System.Text.RegularExpressions
 @using System.Text
+@using Markdig
+@using Ganss.Xss
 @rendermode InteractiveServer
 <PageTitle>Welcome</PageTitle>
 <DxDialogProvider />
@@ -40,7 +42,7 @@
                                           PositionTarget=".info-icon-btn"
                                           PreventCloseOnPositionTargetClick="true"
                                           Width="240">
-                                    Specifies the randomness of response text. Higher values result in a more random output, while lower values make the output more focused and deterministic. Available values are from 0 to 2.
+                                    Determines response randomness. Higher values are more creative; lower values are more predictable. Range: 0–2.
                                 </DxFlyout>
                             </div>
                         </CaptionTemplate>
@@ -63,7 +65,7 @@
                                           PositionTarget=".info-icon-btn"
                                           PreventCloseOnPositionTargetClick="true"
                                           Width="240">
-                                    Language models process text by dividing it into tokens, which can be words or groups of characters. Use the MaxOutputTokens property to limit the maximum number of tokens generated in a single output of a GPT model.
+                                    Determines the maximum length of the model's response. Tokens represent words or pieces of words; approximately 750 words equal 1,000 tokens.
                                 </DxFlyout>
                             </div>
                         </CaptionTemplate>
@@ -74,7 +76,7 @@
 
                     <DxFormLayoutItem ColSpanMd="12">
                         <Template>
-                            <DxButton Text="Send example prompt"
+                            <DxButton Text="Send sample message"
                                       Click="@SendSampleMessage"
                                       CssClass="width-full" />
                         </Template>
@@ -111,9 +113,9 @@
 
 <DxPopup @bind-Visible="@IsSystemPromptVisible"
          ShowFooter="true"
-         HeaderText="Edit Contact">
+         HeaderText="Instructions">
     <BodyContentTemplate>
-        The system prompt is provided below. You may edit it, and any changes will take effect in the chat after you clear it.
+        Modify the system prompt below. Changes apply after you clear the current chat session.
         <DxMemo @bind-Text="SystemPrompt" CssClass="height-300" />
     </BodyContentTemplate>
 </DxPopup>
@@ -124,6 +126,7 @@
     [Inject] IChatClient ChatClient { get; set; } = default!;
     [Inject] IDialogService DialogService { get; set; }
     DxAIChat RefAiChat;
+    private readonly HtmlSanitizer sanitizer = new HtmlSanitizer();
     string SystemPrompt { get; set; }
     bool IsSystemPromptVisible { get; set; } = false;
     float? Temperature { get; set; } = 0;
@@ -145,6 +148,12 @@
     void SendSampleMessage() {
         RefAiChat.SendMessage("open code of this example and change OpenAI to a local Ollama model and run all necessary modification. . This way you will can run this locally",
             ChatRole.User);
+    }
+
+    MarkupString ToHtml(string markdown) {
+        string html = Markdown.ToHtml(markdown);
+        html = sanitizer.Sanitize(html);
+        return new MarkupString(html);
     }
 
     void ResetChat() {

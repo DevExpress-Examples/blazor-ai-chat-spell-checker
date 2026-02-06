@@ -9,7 +9,7 @@
     <PackageReference Include="DevExpress.Blazor" Version="25.1.*-*" />
     <PackageReference Include="DevExpress.AIIntegration.Blazor" Version="25.1.*-*" />
     <PackageReference Include="Markdig" Version="0.41.3" />
-    
+    <PackageReference Include="HtmlSanitizer" Version="9.1.891-beta" />
     <PackageReference Include="Microsoft.Extensions.AI" Version="9.5.0" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="9.5.0-preview.1.25265.7" />
   </ItemGroup>
