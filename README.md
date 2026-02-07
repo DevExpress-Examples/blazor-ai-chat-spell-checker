@@ -35,7 +35,7 @@ We use the following versions of Microsoft AI packages in the project:
 
 This example uses the [OpenAI](https://openai.com/) service. For security, do not hardcode credentials in your source code. Instead, store your OpenAI API key in the `OPENAI_KEY` environment variable.
 
-The following code in [Program.cs](CS/Program.cs) retrieves the API key. If you prefer, you can modify this logic to use the .NET Configuration system to fetch values from _appsettings.json_ or User Secrets.
+The following code in [Program.cs](CS/Program.cs) retrieves the API key. Modify this code if you prefer to keep keys in _appsettings.json_ or User Secrets.
 
 ```csharp
 string OpenAIKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
