@@ -3,7 +3,7 @@
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
 <!-- default badges end -->
-# DevExpress Blazor AI Chat — Grammar Checker
+# DevExpress Blazor AI Chat — Grammar & Style Assistant
 
 The [DevExpress AI Chat](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat) component is a versatile foundation for building AI-driven applications. This example uses [OpenAI services](https://openai.com/index/chatgpt/) to create a customizable grammar checker and demonstrates how to:
 
