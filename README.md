@@ -50,9 +50,9 @@ This section introduces the key code blocks used in the example and how they wor
 
 ### Inference Parameters
 
-Inference parameters are runtime settings that control how a model generates an output. Unlike training parameters (weights), which are fixed after the model is built, inference parameters can change the model's creativity, length, or randomness without retraining.
+Inference parameters are runtime settings that control how a model generates an output. You can use them to change creativity, length, or randomness of a response without retraining the model.
 
-This example allows the user to control model [temperature](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.Temperature). This hyperparameter controls the randomness and creativity of a model's response by adjusting the probability distribution of the next word (token) the model chooses.
+This example allows the user to control model [temperature](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.Temperature).
 
 ```razor
 <DxSpinEdit @bind-Value="@Temperature" MinValue="0" MaxValue="2" Increment="0.05f" />
