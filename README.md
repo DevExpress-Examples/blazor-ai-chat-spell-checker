@@ -15,6 +15,8 @@ The [DevExpress AI Chat](https://docs.devexpress.com/Blazor/DevExpress.AIIntegra
 - Programmatically clear the chat and reset the context.
 - Programmatically send messages to the chat.
 
+[DevExpress Blazor AI Chat — Grammar & Style Assistant](ai-chat-grammar-assistant.png)
+
 ## Setup and Configuration
 
 To run this example, configure the project dependencies and set up secure authentication for an AI service.
