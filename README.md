@@ -7,7 +7,7 @@
 
 The [DevExpress AI Chat](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat) component is a versatile foundation for building AI-driven applications. This example uses [OpenAI services](https://openai.com/index/chatgpt/) to create a customizable grammar checker and demonstrates how to:
 
-- Use inference parameters to control the AI model behavior and creativity.
+- Use inference parameters to control AI model behavior and creativity.
 - Limit token usage for a single call to manage costs and performance.
 - Sanitize user prompts and model outputs to secure your app.
 - Define system prompts that give the AI clear instructions on what to do.
