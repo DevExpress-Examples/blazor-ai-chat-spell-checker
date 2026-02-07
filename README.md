@@ -79,7 +79,7 @@ This example allows the user to control model [temperature](https://docs.devexpr
 
 ### Token Usage
 
-A [token](https://platform.openai.com/tokenizer) is the basic unit of text that an AI model reads and writes. A token can be a whole word, part of a word, or a punctuation mark.
+A [token](https://platform.openai.com/tokenizer) is a basic unit of text that an AI model reads/writes. A token can be a whole word, part of a word, or a punctuation mark.
 
 OpenAI [bills](https://openai.com/api/pricing/) you for the total token count. To save money, [set](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MaxTokens) a maximum number of tokens. A token limit also helps you stay within the model's context window, which ensures the AI retains earlier parts of the conversation.
 
