@@ -211,7 +211,8 @@ Set the [ResponseContentFormat](https://docs.devexpress.com/Blazor/DevExpress.AI
 }
 ```
 
-> **Important**: Always sanitize HTML generated from Markdown to prevent cross-site scripting (XSS). Use a trusted sanitizer (for example, the [HtmlSanitizer](https://www.nuget.org/packages/HtmlSanitizer/) package) to allow only safe tags and attributes before the browser renders content.
+> [!IMPORTANT]
+> Always sanitize HTML generated from Markdown to prevent cross-site scripting (XSS). Use a trusted sanitizer (for example, the [HtmlSanitizer](https://www.nuget.org/packages/HtmlSanitizer/) package) to allow only safe tags and attributes before the browser renders content.
 
 ### Programmatically Handle Messages
 
