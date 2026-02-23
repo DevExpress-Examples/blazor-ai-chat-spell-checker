@@ -1,5 +1,4 @@
 <!-- default badges list -->
-![](https://img.shields.io/endpoint?url=https://codecentral.devexpress.com/api/v1/VersionRange/1072086084/25.2.3%2B)
 [![](https://img.shields.io/badge/Open_in_DevExpress_Support_Center-FF7200?style=flat-square&logo=DevExpress&logoColor=white)](https://supportcenter.devexpress.com/ticket/details/T1309846)
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 [![](https://img.shields.io/badge/💬_Leave_Feedback-feecdd?style=flat-square)](#does-this-example-address-your-development-requirementsobjectives)
@@ -11,16 +10,16 @@ The [DevExpress AI Chat](https://docs.devexpress.com/Blazor/DevExpress.AIIntegra
 - Use inference parameters to control AI model behavior and creativity.
 - Limit token usage for a single call to manage costs and performance.
 - Sanitize user prompts and model outputs to secure your app.
-- Define system prompts that give the AI clear instructions on what to do.
+- Define system prompts that give AI clear instructions on what to do.
 - Request AI answers in Markdown and display them as HTML.
-- Programmatically clear the chat and reset the context.
+- Programmatically clear the chat and reset context.
 - Programmatically send messages to the chat.
 
 ![DevExpress Blazor AI Chat — Grammar & Style Assistant](ai-chat-grammar-assistant.png)
 
 ## Setup and Configuration
 
-To run this example, configure the project dependencies and set up secure authentication for an AI service.
+To run this example, configure project dependencies and set up secure authentication for the desired AI service.
 
 ### AI Packages
 
@@ -29,7 +28,7 @@ We use the following versions of Microsoft AI packages in the project:
 - [Microsoft.Extensions.AI](https://www.nuget.org/packages/Microsoft.Extensions.AI) | **9.7.1**
 - [Microsoft.Extensions.AI.OpenAI](https://www.nuget.org/packages/Microsoft.Extensions.AI.OpenAI) | **9.7.1-preview.1.25365.4**
 
- We do not guarantee compatibility or correct operation with higher versions. Refer to the following announcement for additional information: [DevExpress.AIIntegration moves to a stable version](https://supportcenter.devexpress.com/ticket/details/t1292705/devexpress-aiintegration-references-stable-versions-of-microsoft-ai-packages).
+We cannot guarantee compatibility or correct execution with newer versions. Refer to the following announcement for additional information: [DevExpress.AIIntegration moves to a stable version](https://supportcenter.devexpress.com/ticket/details/t1292705/devexpress-aiintegration-references-stable-versions-of-microsoft-ai-packages).
 
 ### Register AI Service
 
@@ -49,11 +48,11 @@ string OpenAIKey = Environment.GetEnvironmentVariable("OPENAI_KEY");
 
 ## Implementation Details
 
-This section introduces the key code blocks used in the example and how they work together to deliver a complete AI chat experience.
+This section introduces key code blocks used in the example and how they work together to deliver a complete AI chat experience.
 
 ### Inference Parameters
 
-Inference parameters are runtime settings that control how a model generates an output. You can use them to change creativity, length, or randomness of a response without retraining the model.
+Inference parameters are runtime settings that control how a model generates output. You can use them to change creativity, length, or randomness of a response without retraining the model.
 
 This example allows the user to control model [temperature](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.Temperature).
 
@@ -84,7 +83,7 @@ This example allows the user to control model [temperature](https://docs.devexpr
 
 A [token](https://platform.openai.com/tokenizer) is a basic unit of text that an AI model reads/writes. A token can be a whole word, part of a word, or a punctuation mark.
 
-OpenAI [bills](https://openai.com/api/pricing/) you for the total token count. To save money, [set](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MaxTokens) a maximum number of tokens. A token limit also helps you stay within the model's context window, which ensures the AI retains earlier parts of the conversation.
+OpenAI [bills](https://openai.com/api/pricing/) you for the total token count. To save money, [set](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MaxTokens) a maximum number of tokens. A token limit also helps you stay within the model's context window, which ensures AI retains earlier parts of the conversation.
 
 ```razor
 <DxSpinEdit @bind-Value="@MaxTokens" MinValue="0" Increment="10" />
@@ -113,7 +112,7 @@ OpenAI [bills](https://openai.com/api/pricing/) you for the total token count. T
 
 To maintain data privacy, remove Personally Identifiable Information (PII) from your prompts. This practice ensures that sensitive details, such as email addresses or credit card numbers, do not reach external servers.
 
-Handle the [MessageSent](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MessageSent) event to override the automatic message delivery and preprocess the messages before they are sent to OpenAI. 
+Handle the [MessageSent](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MessageSent) event to override the automatic message delivery and preprocess messages before they are sent to OpenAI.
 
 ```razor
 <DxAIChat MessageSent="@MessageSent">
@@ -141,9 +140,9 @@ After the message is processed, call [SendMessage](https://docs.devexpress.com/B
 
 ### AI Instructions
 
-System prompts define instructions and boundaries for the AI, which restrict the model's focus to a specific role. This prevents the model from "chatting" with the user.
+System prompts define instructions and boundaries for AI, which restrict the model's focus to a specific role. This prevents the model from "chatting" with the user.
 
-This example establishes the AI as a proofreader with expert English skills. This specific identity ensures that the model fixes all grammar and punctuation errors and enhance the clarity and flow of the sentences.
+This example establishes AI as the proofreader with expert English skills. This specific identity ensures that the model fixes all grammar and punctuation errors and enhances clarity/sentence flow.
 
 ```text
 You are a proofreader with excellent English skills. Your tasks:
@@ -213,7 +212,7 @@ Set the [ResponseContentFormat](https://docs.devexpress.com/Blazor/DevExpress.AI
 ```
 
 > [!IMPORTANT]
-> Always sanitize HTML generated from Markdown to prevent cross-site scripting (XSS). Use a trusted sanitizer (for example, the [HtmlSanitizer](https://www.nuget.org/packages/HtmlSanitizer/) package) to allow only safe tags and attributes before the browser renders content.
+> Always sanitize HTML generated from Markdown to prevent cross-site scripting (XSS) attacks. Use a trusted sanitizer (for example, the [HtmlSanitizer](https://www.nuget.org/packages/HtmlSanitizer/) package) to allow only safe tags and attributes before the browser renders content.
 
 ### Programmatically Handle Messages
 
@@ -244,7 +243,7 @@ void SendSampleMessage() {
 - [MessageSent](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MessageSent)
 
 <!-- feedback -->
-## Does this example address your development requirements/objectives?
+## Does This Example Address Your Development Requirements/Objectives?
 
 [<img src="https://www.devexpress.com/support/examples/i/yes-button.svg"/>](https://www.devexpress.com/support/examples/survey.xml?utm_source=github&utm_campaign=blazor-ai-chat-spell-checker&~~~was_helpful=yes) [<img src="https://www.devexpress.com/support/examples/i/no-button.svg"/>](https://www.devexpress.com/support/examples/survey.xml?utm_source=github&utm_campaign=blazor-ai-chat-spell-checker&~~~was_helpful=no)
 
