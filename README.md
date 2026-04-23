@@ -53,17 +53,16 @@ This section introduces key code blocks used in the example and how they work to
 
 ### Inference Parameters
 
-Inference parameters are runtime settings that control how a model generates output. You can use them to change creativity, length, or randomness of a response without retraining the model.
-
-This example allows the user to control model [temperature](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.Temperature).
+Inference parameters are runtime settings that control how a model generates output. This example allows the user to control model temperature, which changes creativity, length, or randomness of a response without retraining the model.
 
 ```razor
 <DxSpinEdit @bind-Value="@Temperature" MinValue="0" MaxValue="2" Increment="0.05f" />
 
 <!-- ... -->
 
-<DxAIChat Temperature="@Temperature"
-          MessageSent="@MessageSent">
+<DxAIChat @ref="@RefAiChat"
+          MessageSent="@MessageSent"
+          /* ... */>
 </DxAIChat>
 
 @code {
@@ -84,14 +83,16 @@ This example allows the user to control model [temperature](https://docs.devexpr
 
 A [token](https://platform.openai.com/tokenizer) is a basic unit of text that an AI model reads/writes. A token can be a whole word, part of a word, or a punctuation mark.
 
-OpenAI [bills](https://openai.com/api/pricing/) you for the total token count. To save money, [set](https://docs.devexpress.com/Blazor/DevExpress.AIIntegration.Blazor.Chat.DxAIChat.MaxTokens) a maximum number of tokens. A token limit also helps you stay within the model's context window, which ensures AI retains earlier parts of the conversation.
+OpenAI [bills](https://openai.com/api/pricing/) you for the total token count. To save money, set a maximum number of tokens. A token limit also helps you stay within the model's context window, which ensures AI retains earlier parts of the conversation.
 
 ```razor
 <DxSpinEdit @bind-Value="@MaxTokens" MinValue="0" Increment="10" />
 
 <!-- ... -->
 
-<DxAIChat MessageSent="@MessageSent">
+<DxAIChat @ref="@RefAiChat"
+          MessageSent="@MessageSent"
+          /* ... */>
 </DxAIChat>
 
 @code {
